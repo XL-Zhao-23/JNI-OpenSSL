@@ -5,10 +5,12 @@ import java.security.KeyPairGenerator;
 import java.security.Security;
 import java.util.concurrent.TimeUnit;
 
+import com.zxl.cypto.rsa.NativeRsa1;
+import com.zxl.cypto.rsa.NativeRsa2;
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
 import org.openjdk.jmh.annotations.*;
-
-@BenchmarkMode({Mode.All})
+//java -Djava.library.path=G:\IdeaProject\issue2\src\main\java -jar target/issue2-1.0-SNAPSHOT.jar
+@BenchmarkMode({Mode.Throughput})
 @OutputTimeUnit(TimeUnit.SECONDS)
 @State(Scope.Thread)
 @Warmup(iterations = 3, time = 3)      // 预热3次，每次3秒
@@ -26,8 +28,12 @@ public class RsaBenchmark {
   }
 
   @Benchmark
-  public KeyPair testOpenSSLRSAGen() throws Exception {
-    return RsaKeyUtil.generate(); // 使用 OpenSSL 的 Native 方法
+  public KeyPair testOpenSSLRSAGen1() throws Exception {
+    return NativeRsa1.generate(); // 使用 OpenSSL 的 Native 方法
+  }
+  @Benchmark
+  public KeyPair testOpenSSLRSAGen2() throws Exception {
+    return NativeRsa2.generateKeyPair(2048); // 使用 OpenSSL 的 Native 方法
   }
 
   @Benchmark

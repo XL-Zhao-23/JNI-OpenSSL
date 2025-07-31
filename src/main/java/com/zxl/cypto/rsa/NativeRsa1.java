@@ -1,27 +1,32 @@
-package com.zxl.cypto;
+package com.zxl.cypto.rsa;
 
-import java.io.StringReader;
-import java.security.KeyPair;
-import java.security.PrivateKey;
-import java.security.PublicKey;
 import org.bouncycastle.asn1.pkcs.PrivateKeyInfo;
 import org.bouncycastle.asn1.pkcs.RSAPrivateKey;
 import org.bouncycastle.asn1.x509.SubjectPublicKeyInfo;
 import org.bouncycastle.openssl.PEMParser;
 import org.bouncycastle.openssl.jcajce.JcaPEMKeyConverter;
 
-public class RsaKeyUtil {
+import java.io.StringReader;
+import java.security.KeyPair;
+import java.security.PrivateKey;
+import java.security.PublicKey;
 
+public class NativeRsa1 {
+  static {
+    System.loadLibrary("rsa1");
+  }
+
+  public static native byte[] generateRSAKeyPairNative();
   public static KeyPair generate() throws Exception {
 
     byte[] array = NativeRsa1.generateRSAKeyPairNative();
 
     // 1. 提取私钥长度（前4字节，小端）
     int len =
-        (array[0] & 0xFF)
-            | ((array[1] & 0xFF) << 8)
-            | ((array[2] & 0xFF) << 16)
-            | ((array[3] & 0xFF) << 24);
+      (array[0] & 0xFF)
+        | ((array[1] & 0xFF) << 8)
+        | ((array[2] & 0xFF) << 16)
+        | ((array[3] & 0xFF) << 24);
 
     // 2. 拆分 PEM 内容
     String privPem = new String(array, 4, len);
@@ -44,11 +49,11 @@ public class RsaKeyUtil {
       // PKCS#1 format - convert to PKCS#8
       RSAPrivateKey rsaPriv = (RSAPrivateKey) obj;
       PrivateKeyInfo privateKeyInfo =
-          new PrivateKeyInfo(
-              new org.bouncycastle.asn1.x509.AlgorithmIdentifier(
-                  org.bouncycastle.asn1.pkcs.PKCSObjectIdentifiers.rsaEncryption,
-                  org.bouncycastle.asn1.DERNull.INSTANCE),
-              rsaPriv);
+        new PrivateKeyInfo(
+          new org.bouncycastle.asn1.x509.AlgorithmIdentifier(
+            org.bouncycastle.asn1.pkcs.PKCSObjectIdentifiers.rsaEncryption,
+            org.bouncycastle.asn1.DERNull.INSTANCE),
+          rsaPriv);
       privateKey = converter.getPrivateKey(privateKeyInfo);
     } else if (obj instanceof org.bouncycastle.openssl.PEMKeyPair) {
       // PEMKeyPair format

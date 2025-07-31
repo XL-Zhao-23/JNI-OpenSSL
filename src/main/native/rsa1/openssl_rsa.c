@@ -5,7 +5,7 @@
 #include <stdlib.h>
 #include <string.h>
 
-JNIEXPORT jbyteArray JNICALL Java_com_zxl_cypto_NativeRsa_generateRSAKeyPairNative
+JNIEXPORT jbyteArray JNICALL Java_com_zxl_cypto_rsa_NativeRsa1_generateRSAKeyPairNative
   (JNIEnv *env, jclass clazz) {
 
     int keylen = 2048;
