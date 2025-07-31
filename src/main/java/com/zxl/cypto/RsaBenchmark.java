@@ -5,17 +5,18 @@ import java.security.KeyPairGenerator;
 import java.security.Security;
 import java.util.concurrent.TimeUnit;
 
-import com.zxl.cypto.rsa.NativeRsa1;
 import com.zxl.cypto.rsa.NativeRsa2;
+import com.zxl.cypto.rsa.NativeRsa3;
+
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
 import org.openjdk.jmh.annotations.*;
-//java -Djava.library.path=G:\IdeaProject\issue2\src\main\java -jar target/issue2-1.0-SNAPSHOT.jar
-@BenchmarkMode({Mode.Throughput})
+
+@BenchmarkMode(Mode.Throughput)
 @OutputTimeUnit(TimeUnit.SECONDS)
 @State(Scope.Thread)
-@Warmup(iterations = 3, time = 3)      // 预热3次，每次3秒
-@Measurement(iterations = 5, time = 5)  // 正式测量5次，每次5秒
-@Fork(1)                                                           // 启动1个JVM进程运行测试
+@Warmup(iterations = 3, time = 3)      // 预热3轮，每轮3秒
+@Measurement(iterations = 5, time = 5)  // 测量5轮，每轮5秒
+@Fork(1)                               // 启动1个JVM实例
 public class RsaBenchmark {
 
   private KeyPairGenerator jdkGenerator;
@@ -24,20 +25,30 @@ public class RsaBenchmark {
   public void setup() throws Exception {
     Security.addProvider(new BouncyCastleProvider());
     jdkGenerator = KeyPairGenerator.getInstance("RSA");
-    jdkGenerator.initialize(2048); // 指定密钥长度
+    jdkGenerator.initialize(2048);
   }
+//  @Benchmark
+//  public KeyPair testJDKRSAGen() throws Exception {
+//    return jdkGenerator.generateKeyPair();
+//  }
+//  @Benchmark
+//  public KeyPair testJDKRSAGen1() throws Exception {
+//    return jdkGenerator.generateKeyPair();
+//  }
+//
+//  @Benchmark
+//  public KeyPair testNativeRsa2() {
+//    return NativeRsa2.generateKeyPair(2048);
+//  }
 
   @Benchmark
-  public KeyPair testOpenSSLRSAGen1() throws Exception {
-    return NativeRsa1.generate(); // 使用 OpenSSL 的 Native 方法
-  }
-  @Benchmark
-  public KeyPair testOpenSSLRSAGen2() throws Exception {
-    return NativeRsa2.generateKeyPair(2048); // 使用 OpenSSL 的 Native 方法
+  public KeyPair testNativeRsa3() {
+    return NativeRsa3.generateKeyPair();
   }
 
-  @Benchmark
-  public KeyPair testJDKRSAGen() throws Exception {
-    return jdkGenerator.generateKeyPair(); // 使用 JDK 原生方法
+  // 运行结束时释放 NativeRsa3 的本地资源，防止内存泄漏
+  @TearDown(Level.Trial)
+  public void tearDown() {
+    NativeRsa3.freeContext();
   }
 }
