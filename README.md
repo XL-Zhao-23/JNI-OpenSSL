@@ -4,6 +4,9 @@
 
 JNI-OpenSSL 是一个基于 JNI (Java Native Interface) 和 OpenSSL 的高性能 RSA 密钥生成项目。该项目实现了多种 RSA 密钥生成方案，包括 JDK 原生实现、JNI 调用 OpenSSL 实现，以及自定义的 Java Security Provider 实现。
 
+项目背景来源于腾讯犀牛鸟开源人才计划，由于对此issue感兴趣而跟进，https://github.com/Tencent/OpenSourceTalent/issues/46
+对spi服务发现的优化思路来源于 ACCP https://github.com/corretto/amazon-corretto-crypto-provider
+
 ## 项目结构
 
 ```
