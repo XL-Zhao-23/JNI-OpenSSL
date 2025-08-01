@@ -19,13 +19,13 @@ public class OpenSSLRSAGenerator extends KeyPairGeneratorSpi {
     public void initialize(AlgorithmParameterSpec params, SecureRandom random) {
         throw new UnsupportedOperationException("ParameterSpec initialization not supported");
     }
-//
-//    @Override
-//    public KeyPair generateKeyPair() {
-//        return NativeRsa2.generateKeyPair(keySize);
-//    }
+
     @Override
     public KeyPair generateKeyPair() {
-        return NativeRsa3.generateKeyPair();
+        return NativeRsa2.generateKeyPair(keySize);
     }
+//    @Override
+//    public KeyPair generateKeyPair() {
+//        return NativeRsa3.generateKeyPair();
+//    }
 }

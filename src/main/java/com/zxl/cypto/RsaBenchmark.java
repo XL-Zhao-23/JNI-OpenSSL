@@ -1,16 +1,24 @@
 package com.zxl.cypto;
 
-import java.security.KeyPair;
-import java.security.KeyPairGenerator;
-import java.security.Security;
+import java.security.*;
 import java.util.concurrent.TimeUnit;
 
-import com.zxl.cypto.rsa.NativeRsa2;
+import com.zxl.cypto.provider.OpenSSLProvider1;
+import com.zxl.cypto.provider.OpenSSLProvider2;
 import com.zxl.cypto.rsa.NativeRsa3;
 
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
 import org.openjdk.jmh.annotations.*;
+//java -Djava.library.path=G:\IdeaProject\issue2\src\main\java -jar target/issue2-1.0-SNAPSHOT.jar
+//Benchmark                     Mode  Cnt   Score   Error  Units
+//RsaBenchmark.testJDKRSAGen   thrpt    5   7.981 ± 1.398  ops/s
+//RsaBenchmark.testNativeRsa1  thrpt    5  11.529 ± 4.868  ops/s
+//RsaBenchmark.testNativeRsa2  thrpt    5  12.658 ± 4.177  ops/s
+//RsaBenchmark.testNativeRsa3  thrpt    5  13.606 ± 4.787  ops/s
 
+//Benchmark                Mode  Cnt        Score        Error  Units
+//RsaBenchmark.provider1  thrpt    5  2204796.742 ± 417543.544  ops/s
+//RsaBenchmark.provider2  thrpt    5  6936790.673 ± 915992.159  ops/s
 @BenchmarkMode(Mode.Throughput)
 @OutputTimeUnit(TimeUnit.SECONDS)
 @State(Scope.Thread)
@@ -41,14 +49,36 @@ public class RsaBenchmark {
 //    return NativeRsa2.generateKeyPair(2048);
 //  }
 
+//  @Benchmark
+//  public KeyPair testNativeRsa3() {
+//    return NativeRsa3.generateKeyPair();
+//  }
+//
+//  // 运行结束时释放 NativeRsa3 的本地资源，防止内存泄漏
+//  @TearDown(Level.Trial)
+//  public void tearDown() {
+//    NativeRsa3.freeContext();
+//  }
+
   @Benchmark
-  public KeyPair testNativeRsa3() {
-    return NativeRsa3.generateKeyPair();
+  public void provider2(){
+    Security.addProvider(OpenSSLProvider2.INSTANCE);
+    try {
+      // handle方式发现服务
+      KeyPairGenerator.getInstance("RSA", "OpenSSL2");
+    } catch (NoSuchAlgorithmException | NoSuchProviderException e) {
+      throw new RuntimeException(e);
+    }
   }
 
-  // 运行结束时释放 NativeRsa3 的本地资源，防止内存泄漏
-  @TearDown(Level.Trial)
-  public void tearDown() {
-    NativeRsa3.freeContext();
+  @Benchmark
+  public void provider1(){
+    Security.addProvider(new OpenSSLProvider1());
+    try {
+      // 反射方式发现服务
+      KeyPairGenerator.getInstance("RSA", "OpenSSL1");
+    } catch (NoSuchAlgorithmException | NoSuchProviderException e) {
+      throw new RuntimeException(e);
+    }
   }
 }

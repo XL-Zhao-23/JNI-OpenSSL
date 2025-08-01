@@ -8,7 +8,7 @@ public class NativeRsa3 {
     System.loadLibrary("rsa3");
   }
 
-  // 新增：初始化 native 线程上下文，返回一个 long 句柄（指针）
+  // 新增：初始化 native 线程上下文，返回一个 long 指针
   private static native long initNativeContext(int bits);
 
   // 新增：释放 native 线程上下文
@@ -18,7 +18,7 @@ public class NativeRsa3 {
   // 返回格式：keyPairs[count][0]=私钥bytes，keyPairs[count][1]=公钥bytes
   private static native byte[][][] generateRSAKeyPairsNative(long ctxPtr, int count);
 
-  // Java层 ThreadLocal 管理 native 上下文句柄
+  // Java层 ThreadLocal 管理 native 上下文指针
   private static final ThreadLocal<Long> nativeContext = ThreadLocal.withInitial(() -> initNativeContext(2048));
 
   public static void freeContext() {

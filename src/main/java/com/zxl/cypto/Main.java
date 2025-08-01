@@ -1,12 +1,13 @@
 package com.zxl.cypto;
 
-import com.zxl.cypto.provider.OpenSSLProvider;
+import com.zxl.cypto.provider.OpenSSLProvider1;
+import com.zxl.cypto.provider.OpenSSLProvider2;
 
 import java.security.*;
 
 public class Main {
   public static void main(String[] args) {
-    Security.addProvider(new OpenSSLProvider());
+
 //    try {
 //      // 注册 BouncyCastle Provider（只需注册一次）
 //      Security.addProvider(new BouncyCastleProvider());
@@ -21,9 +22,10 @@ public class Main {
 //    }
 
 
-
+    Security.addProvider(new OpenSSLProvider1());
+    Security.addProvider(OpenSSLProvider2.INSTANCE);
     try {
-      KeyPairGenerator gen = KeyPairGenerator.getInstance("RSA", "OpenSSL");
+      KeyPairGenerator gen = KeyPairGenerator.getInstance("RSA", "OpenSSL2");
       gen.initialize(2048);
       KeyPair kp = gen.generateKeyPair();
 
