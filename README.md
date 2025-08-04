@@ -22,7 +22,7 @@ JNI-OpenSSL/
 │   └── rsa/                        # JNI 原生实现
 │       ├── NativeRsa1.java         # 基于 PEM 格式的 RSA 实现
 │       ├── NativeRsa2.java         # 基于 PKCS8/X509 格式的 RSA 实现
-│       └── NativeRsa3.java         # 批量生成优化的 RSA 实现
+│       └── NativeRsa3.java         # 进行中
 ├── src/main/native/                 # 原生代码实现
 │   ├── rsa1/                       # NativeRsa1 对应的 C 代码
 │   ├── rsa2/                       # NativeRsa2 对应的 C 代码
@@ -41,7 +41,7 @@ JNI-OpenSSL/
 #### JNI + OpenSSL 实现
 - **NativeRsa1**: 基于 PEM 格式，支持 PKCS#1 和 PKCS#8 私钥格式
 - **NativeRsa2**: 基于 PKCS8/X509 格式，直接返回字节数组
-- **NativeRsa3**: 批量生成优化版本，使用 ThreadLocal 管理原生上下文
+- **NativeRsa3**: 进行中
 
 #### 自定义 Security Provider
 - **OpenSSLProvider1**: 使用反射方式发现服务
@@ -49,7 +49,7 @@ JNI-OpenSSL/
 
 ### 2. 性能优化特性
 
-- **批量生成**: NativeRsa3 支持批量生成 RSA 密钥对，减少 JNI 调用开销
+- **批量生成**: NativeRsa3 支持批量生成 RSA 密钥对，减少 JNI 调用开销 （进行中）
 - **上下文复用**: 使用 ThreadLocal 管理原生上下文，避免重复初始化
 - **内存管理**: 提供资源释放机制，防止内存泄漏
 
@@ -128,7 +128,7 @@ KeyPair keyPair2 = NativeRsa2.generateKeyPair(2048);
 KeyPair keyPair3 = NativeRsa3.generateKeyPair();
 
 // 批量生成
-byte[][][] keyPairs = NativeRsa3.generateKeyPairs(100);
+byte[][][] keyPairs = NativeRsa3.generateKeyPairs(100); (进行中)
 ```
 
 #### 使用自定义 Provider
@@ -158,7 +158,7 @@ KeyPair keyPair = gen.generateKeyPair();
    - 更简洁的实现
 
 3. **NativeRsa3**: 
-   - 批量生成优化
+   - 批量生成优化(进行中)
    - ThreadLocal 上下文管理
    - 内存资源管理
 
@@ -179,11 +179,9 @@ KeyPair keyPair = gen.generateKeyPair();
 
 1. **JNI 实现优于 JDK**: 所有 JNI 实现的性能都优于 JDK 原生实现，性能提升 44%-70%
 
-2. **批量生成优化**: NativeRsa3 通过批量生成和上下文复用，获得了最佳性能
+2. **MethodHandle 优于反射**: OpenSSLProvider2 使用 MethodHandle 比 OpenSSLProvider1 使用反射快约 3 倍
 
-3. **MethodHandle 优于反射**: OpenSSLProvider2 使用 MethodHandle 比 OpenSSLProvider1 使用反射快约 3 倍
-
-4. **Provider 发现性能极高**: 自定义 Provider 的发现性能达到数百万 ops/s，说明 JNI 调用开销相对较小
+3. **Provider 发现性能极高**: 自定义 Provider 的发现性能达到数百万 ops/s，说明 JNI 调用开销相对较小
 
 ## 注意事项
 
