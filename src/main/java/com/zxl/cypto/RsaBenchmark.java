@@ -5,6 +5,7 @@ import java.util.concurrent.TimeUnit;
 
 import com.zxl.cypto.provider.OpenSSLProvider1;
 import com.zxl.cypto.provider.OpenSSLProvider2;
+import com.zxl.cypto.rsa.NativeRsa2;
 import com.zxl.cypto.rsa.NativeRsa3;
 
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
@@ -19,6 +20,18 @@ import org.openjdk.jmh.annotations.*;
 //Benchmark                Mode  Cnt        Score        Error  Units
 //RsaBenchmark.provider1  thrpt    5  2204796.742 ± 417543.544  ops/s
 //RsaBenchmark.provider2  thrpt    5  6936790.673 ± 915992.159  ops/s
+
+// batchsize = 100
+//Benchmark                          Mode  Cnt  Score   Error  Units
+//RsaBenchmark.batchGenerationRsa2  thrpt    5  0.108 ± 0.044  ops/s
+//RsaBenchmark.batchGenerationRsa3  thrpt    5  0.114 ± 0.040  ops/s
+
+// batchsize = 1000
+//Benchmark                          Mode  Cnt  Score   Error  Units
+//RsaBenchmark.batchGenerationRsa2  thrpt    5  0.010 ± 0.001  ops/s
+//RsaBenchmark.batchGenerationRsa3  thrpt    5  0.011 ± 0.003  ops/s
+
+
 @BenchmarkMode(Mode.Throughput)
 @OutputTimeUnit(TimeUnit.SECONDS)
 @State(Scope.Thread)
@@ -28,12 +41,14 @@ import org.openjdk.jmh.annotations.*;
 public class RsaBenchmark {
 
   private KeyPairGenerator jdkGenerator;
+  private int batchSize;
 
   @Setup(Level.Iteration)
   public void setup() throws Exception {
     Security.addProvider(new BouncyCastleProvider());
     jdkGenerator = KeyPairGenerator.getInstance("RSA");
     jdkGenerator.initialize(2048);
+    batchSize = 1000;
   }
 //  @Benchmark
 //  public KeyPair testJDKRSAGen() throws Exception {
@@ -60,25 +75,38 @@ public class RsaBenchmark {
 //    NativeRsa3.freeContext();
 //  }
 
+//  @Benchmark
+//  public void provider2(){
+//    Security.addProvider(OpenSSLProvider2.INSTANCE);
+//    try {
+//      // handle方式发现服务
+//      KeyPairGenerator.getInstance("RSA", "OpenSSL2");
+//    } catch (NoSuchAlgorithmException | NoSuchProviderException e) {
+//      throw new RuntimeException(e);
+//    }
+//  }
+//
+//  @Benchmark
+//  public void provider1(){
+//    Security.addProvider(new OpenSSLProvider1());
+//    try {
+//      // 反射方式发现服务
+//      KeyPairGenerator.getInstance("RSA", "OpenSSL1");
+//    } catch (NoSuchAlgorithmException | NoSuchProviderException e) {
+//      throw new RuntimeException(e);
+//    }
+//  }
+
   @Benchmark
-  public void provider2(){
-    Security.addProvider(OpenSSLProvider2.INSTANCE);
-    try {
-      // handle方式发现服务
-      KeyPairGenerator.getInstance("RSA", "OpenSSL2");
-    } catch (NoSuchAlgorithmException | NoSuchProviderException e) {
-      throw new RuntimeException(e);
+  public void batchGenerationRsa2(){
+    for(int i = 0; i < batchSize; i++){
+      NativeRsa2.generateKeyPair(2048);
     }
   }
 
   @Benchmark
-  public void provider1(){
-    Security.addProvider(new OpenSSLProvider1());
-    try {
-      // 反射方式发现服务
-      KeyPairGenerator.getInstance("RSA", "OpenSSL1");
-    } catch (NoSuchAlgorithmException | NoSuchProviderException e) {
-      throw new RuntimeException(e);
-    }
+  public void batchGenerationRsa3(){
+    NativeRsa3.generateKeyPairs(batchSize);
   }
+
 }
